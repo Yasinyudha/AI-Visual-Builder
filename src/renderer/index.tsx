@@ -8,6 +8,7 @@ import { FeatureSelected } from '../services/featureSelected';
 import { LabelSelected } from '../services/labelSelected';
 import { useWorkspace } from '../workspace/indexSelection';
 import { useGlobalStore } from '../workspace/globalStore';
+import { ProcessedTablePreview } from '../services/processedTableContent';
 
 // All of local interfaces is written here
 interface SelectorItemProps {
@@ -17,7 +18,23 @@ interface SelectorItemProps {
     onClick: () => void;
 }
 
-// All of helper and sub-components written here
+interface RadioSelectorProps {
+    title: string;
+    isSelected: boolean;
+    setIsSelected: (newState: boolean) => void;
+}
+
+interface NormalizingMethodProps {
+    title: string;
+    normalizedState: boolean;
+    scalerDropdownState: boolean;
+    scalerValue: string;
+    scalerOptions: string[];
+    setScalerDropdownState: (scalerDropdownState: boolean) => void;
+    setScalerValue: (scalerValue: string) => void;
+}
+
+// All of helper and sub-components are written here
 function SelectorItem({ title, count, itemText, onClick }: SelectorItemProps) {
     return (
         <div
@@ -29,6 +46,72 @@ function SelectorItem({ title, count, itemText, onClick }: SelectorItemProps) {
                 {count !== null ? count : 0} {itemText}
             </span>
         </div>
+    );
+}
+
+function RadioSelector({
+    title,
+    isSelected,
+    setIsSelected,
+}: RadioSelectorProps) {
+    return (
+        <div className="flex items-center justify-between px-3 py-2">
+            <span>{title}</span>
+            <div
+                className={`border-2 border-white hover:cursor-pointer ${isSelected ? 'p-0.5' : 'p-1.5'}`}
+                onClick={() => setIsSelected(!isSelected)}
+            >
+                {isSelected && <div className="h-1.5 w-1.5 bg-white"></div>}
+            </div>
+        </div>
+    );
+}
+
+function DropdownSelector({
+    title,
+    normalizedState,
+    scalerDropdownState,
+    scalerValue,
+    scalerOptions,
+    setScalerDropdownState,
+    setScalerValue,
+}: NormalizingMethodProps) {
+    return (
+        <div
+            className={`items-center justify-between px-3 py-2 ${normalizedState ? 'flex' : 'hidden'}`}
+        >
+            <span>{title}</span>
+            <div
+                className="relative flex items-center justify-between gap-3 rounded-md border border-white/50 px-4 py-2 text-xs"
+                onClick={() => setScalerDropdownState(!scalerDropdownState)}
+            >
+                <span>{scalerValue}</span>
+                <img src={arrow} alt="arrow" className="w-3 rotate-90" />
+                <div
+                    className={`bg-dark absolute top-full left-0 z-50 flex-col gap-1 rounded-md border border-white/50 p-2 text-xs ${
+                        scalerDropdownState ? 'flex' : 'hidden'
+                    }`}
+                >
+                    {scalerOptions.map((scaler, index) => (
+                        <div
+                            key={index}
+                            className="rounded-md px-4 py-2 hover:cursor-pointer hover:bg-white/10"
+                            onClick={() => setScalerValue(scaler)}
+                        >
+                            <span className="whitespace-nowrap">{scaler}</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function ProcessSubmit() {
+    return (
+        <button className="hover:bg-bright-green/10 hover:border-bright-green mx-3 mt-3 rounded-md border border-white/50 bg-white/10 p-2 transition-all duration-150 ease-in-out hover:cursor-pointer">
+            <span>Process and Apply</span>
+        </button>
     );
 }
 
@@ -64,11 +147,58 @@ const Sidebar = ({
 }) => {
     const workspace = useWorkspace(onSelectFile);
 
+    // Options
+    const scalerOptions = ['MinMax Scaler', 'Robust Scaler'];
+    const encodeCategoricalOptions = ['One-Hot Encoding', 'Ordinal Encoding'];
+
     const [isFeatureModalOpen, setFeatureModalOpen] = useState(false);
     const [isLabelModalOpen, setLabelModalOpen] = useState(false);
 
-    // Set selected file path state
-    const selectedFilePath = useGlobalStore((state) => state.selectedFilePath);
+    // Set scaler dropdown state
+    const scalerDropdownState = useGlobalStore(
+        (state) => state.scalerDropdownState,
+    );
+    const setScalerDropdownState = useGlobalStore(
+        (state) => state.setScalerDropdownState,
+    );
+
+    // Set scaler value dropdown
+    const scalerValue = useGlobalStore((state) => state.scalerValue);
+    const setScalerValue = useGlobalStore((state) => state.setScalerValue);
+
+    // Set selected dropna values checkbox
+    const dropnaState = useGlobalStore((state) => state.dropnaState);
+    const setDropnaState = useGlobalStore((state) => state.setDropnaState);
+
+    // Set selected normalized checkbox
+    const normalizedState = useGlobalStore((state) => state.normalizedState);
+    const setNormalizedState = useGlobalStore(
+        (state) => state.setNormalizedState,
+    );
+
+    // Set selected encode categorical checkbox
+    const encodeCategoricalState = useGlobalStore(
+        (state) => state.encodeCategoricalState,
+    );
+    const setEncodeCategoricalState = useGlobalStore(
+        (state) => state.setEncodeCategoricalState,
+    );
+
+    // Set encode categorical value
+    const encodeCategoricalValue = useGlobalStore(
+        (state) => state.encodeCategoricalValue,
+    );
+    const setEncodeCategoricalValue = useGlobalStore(
+        (state) => state.setEncodeCategoricalValue,
+    );
+
+    // Set encode categorical dropdown state
+    const encodeCategoricalDropdownState = useGlobalStore(
+        (state) => state.encodeCategoricalDropdownState,
+    );
+    const setEncodeCategoricalDropdownState = useGlobalStore(
+        (state) => state.setEncodeCategoricalDropdownState,
+    );
 
     // Set selected labels state
     const selectedLabels = useGlobalStore((state) => state.selectedLabels);
@@ -90,7 +220,7 @@ const Sidebar = ({
     );
 
     return (
-        <div className="grid grid-rows-2 border-r border-white/10 px-2 pt-3">
+        <div className="grid grid-rows-[2fr_5fr] border-r border-white/10 px-2 pt-3">
             <div>
                 <div
                     className="flex items-center justify-between border-b border-white/10 px-3 pt-1.5 pb-2.5 hover:cursor-pointer hover:rounded-md hover:bg-white/10"
@@ -145,16 +275,52 @@ const Sidebar = ({
                 <div className="mt-3 flex flex-col gap-1">
                     <SelectorItem
                         title="Feature"
-                        count={selectedFeatures.length} // Derived state!
+                        count={selectedFeatures.length}
                         itemText="features"
                         onClick={() => setFeatureModalOpen(true)}
                     />
                     <SelectorItem
                         title="Label"
-                        count={selectedLabels.length} // Derived state!
+                        count={selectedLabels.length}
                         itemText="labels"
                         onClick={() => setLabelModalOpen(true)}
                     />
+                    <RadioSelector
+                        title="Drop NaN values"
+                        isSelected={dropnaState}
+                        setIsSelected={setDropnaState}
+                    />
+                    <RadioSelector
+                        title="Normalize value"
+                        isSelected={normalizedState}
+                        setIsSelected={setNormalizedState}
+                    />
+                    <DropdownSelector
+                        title="Normalizing Methods"
+                        normalizedState={normalizedState}
+                        scalerDropdownState={scalerDropdownState}
+                        scalerValue={scalerValue}
+                        scalerOptions={scalerOptions}
+                        setScalerValue={setScalerValue}
+                        setScalerDropdownState={setScalerDropdownState}
+                    />
+                    <RadioSelector
+                        title="Encode categorical"
+                        isSelected={encodeCategoricalState}
+                        setIsSelected={setEncodeCategoricalState}
+                    />
+                    <DropdownSelector
+                        title="Encoding Methods"
+                        normalizedState={encodeCategoricalState}
+                        scalerDropdownState={encodeCategoricalDropdownState}
+                        scalerValue={encodeCategoricalValue}
+                        scalerOptions={encodeCategoricalOptions}
+                        setScalerValue={setEncodeCategoricalValue}
+                        setScalerDropdownState={
+                            setEncodeCategoricalDropdownState
+                        }
+                    />
+                    <ProcessSubmit />
                 </div>
             </div>
 
@@ -182,8 +348,9 @@ const Sidebar = ({
 const MainContent = () => {
     return (
         <div className="grid grid-rows-[3fr_1fr]">
-            <div className="p-6">
+            <div className="grid grid-rows-[2fr_1fr]">
                 <PythonCalculator />
+                <ProcessedTablePreview />
             </div>
             <BottomMainContent />
         </div>
@@ -198,7 +365,7 @@ const App = () => {
     return (
         <div className="font-jakarta-regular bg-dark flex h-screen flex-col text-sm text-white">
             <Header />
-            <div className="grid flex-1 grid-cols-[1fr_5fr]">
+            <div className="grid flex-1 grid-cols-[1fr_4fr]">
                 <Sidebar onSelectFile={(path) => setSelectedFilePath(path)} />
                 <MainContent />
             </div>
