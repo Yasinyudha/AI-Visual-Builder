@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ipcRenderer } from 'electron';
+import { useIndexStore } from '../stores/renderer/indexStore';
 
 export const useWorkspace = (onSelectFile: (filePath: string) => void) => {
     const [workspacePath, setWorkspacePath] = useState<string | null>(null);
@@ -7,8 +8,10 @@ export const useWorkspace = (onSelectFile: (filePath: string) => void) => {
     const [size, setSize] = useState<number[] | null>(null);
     const [activeFile, setActiveFile] = useState<string | null>(null);
 
+    const setSelectedFilePath = useIndexStore((state) => state.setSelectedFilePath);
+
     const folderName = workspacePath
-        ? workspacePath.split('/').pop() || workspacePath
+        ? workspacePath.split(/[/\\]/).filter(Boolean).pop() || workspacePath
         : 'No Workspace';
 
     const handleSelectWorkspace = async () => {
@@ -19,8 +22,10 @@ export const useWorkspace = (onSelectFile: (filePath: string) => void) => {
     const handleFileClick = (filename: string) => {
         if (!workspacePath) return;
         const absolutePath = `${workspacePath}/${filename}`;
+
         setActiveFile(filename);
         onSelectFile(absolutePath);
+        setSelectedFilePath(absolutePath);
     };
 
     useEffect(() => {

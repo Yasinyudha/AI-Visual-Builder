@@ -43,4 +43,6 @@ textarea {
     --color-bright-green: #20ef41;
     --color-dropdown-black: #1a1a1a;
     --color-bright-red: #ff0019;
+
+    --text-xxs: 0.625rem;
 }

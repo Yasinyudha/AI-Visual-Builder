@@ -1,16 +1,25 @@
 import { useEffect, useState } from 'react';
 import { arrow, emptyFolder } from '../renderer/global';
-import { useGlobalStore } from '../workspace/globalStore';
+import { useGlobal, useGlobalStore } from '../workspace/globalStore';
+import { useIndexStore } from '../stores/renderer/indexStore';
+import {
+    useMainContent,
+    useMainContentStore,
+} from '../stores/services/BottomMainContentStore';
 
 const Header = () => {
+    const tableHeaderMenu = ['Raw Table Preview', 'Processed Table Preview'];
     const [isDropdownActive, setIsDropdownActive] = useState(false);
 
+    // Set menu table state
+    const [menuTableState, setMenuTableState] =
+        useMainContent('menuTableState');
+
     // Set limit state
-    const limit = useGlobalStore((state) => state.limit);
-    const setLimit = useGlobalStore((state) => state.setLimit);
+    const [limit, setLimit] = useMainContent('limit');
 
     // Pull total rows from global state
-    const totalRows = useGlobalStore((state) => state.totalRows);
+    const totalRows = useMainContentStore((state) => state.totalRows);
 
     const handleSelect = (value: number) => {
         setLimit(value);
@@ -21,7 +30,21 @@ const Header = () => {
 
     return (
         <div className="flex items-center justify-between">
-            <span>Table Preview</span>
+            <div className="flex gap-1 rounded-md border border-white/10 p-1">
+                {tableHeaderMenu.map((menu, index) => (
+                    <div
+                        key={index}
+                        className={`flex items-center justify-center px-4 py-1.5 hover:cursor-pointer ${
+                            menuTableState === index
+                                ? 'rounded-sm bg-white/10'
+                                : ''
+                        }`}
+                        onClick={() => setMenuTableState(index)}
+                    >
+                        <span>{menu}</span>
+                    </div>
+                ))}
+            </div>
             <div className="flex items-center gap-2">
                 <span>Showing</span>
                 <div
@@ -66,28 +89,45 @@ const Header = () => {
 };
 
 const Table = () => {
+    // Pull menu state
+    const menuTableState = useMainContentStore((state) => state.menuTableState);
+
     // Set rows state
-    const rows = useGlobalStore((state) => state.rows);
-    const setRows = useGlobalStore((state) => state.setRows);
+    const [rawRows, setRawRows] = useMainContent('rows');
+
+    // Set processed rows state
+    const [processedRows, setProcessedTableRows] =
+        useMainContent('processedRows');
+
+    // Dynamically assign rows and setRows
+    const rows = menuTableState === 0 ? rawRows : processedRows;
 
     // Set columns state
-    const columns = useGlobalStore((state) => state.columns);
-    const setColumns = useGlobalStore((state) => state.setColumns);
+    const [rawColumns, setRawColumns] = useMainContent('columns');
+
+    // Set processed columns state
+    const [processedColumns, setProcessedColumns] =
+        useMainContent('processedColumns');
+
+    // Dynamically assign columns and setColumns
+    const columns = menuTableState === 0 ? rawColumns : processedColumns;
+    const setColumns =
+        menuTableState === 1 ? setRawColumns : setProcessedColumns;
 
     // Set total rows state
-    const setTotalRows = useGlobalStore((state) => state.setTotalRows);
+    const setTotalRows = useMainContentStore((state) => state.setTotalRows);
 
     // Pull selected file path state
-    const selectedFilePath = useGlobalStore((state) => state.selectedFilePath);
+    const selectedFilePath = useIndexStore((state) => state.selectedFilePath);
 
     // Pull limit state
-    const limit = useGlobalStore((state) => state.limit);
+    const limit = useMainContentStore((state) => state.limit);
 
     // Pull selected features state
-    const selectedFeatures = useGlobalStore((state) => state.selectedFeatures);
+    const selectedFeatures = useIndexStore((state) => state.selectedFeatures);
 
     // Pull selected labels state
-    const selectedLabels = useGlobalStore((state) => state.selectedLabels);
+    const selectedLabels = useIndexStore((state) => state.selectedLabels);
 
     useEffect(() => {
         if (!selectedFilePath) return;
@@ -111,11 +151,8 @@ const Table = () => {
 
             const data = await response.json();
 
-            // Set columns and row state
-            setColumns(data.columns);
-            setRows(data.rows);
-
-            // Set total rows state
+            setRawColumns(data.columns);
+            setRawRows(data.rows);
             setTotalRows(data.total_rows);
         };
         fetchColumns(selectedFilePath);
@@ -131,8 +168,8 @@ const Table = () => {
     }
 
     return (
-        <div className="mt-5 h-50 w-max overflow-auto rounded-t-xl border border-white/10 bg-white/5 whitespace-nowrap">
-            <table className="w-full border-collapse text-left text-sm text-slate-200">
+        <div className="mt-5 max-h-50 w-max overflow-auto rounded-t-xl border border-white/10 bg-white/5 whitespace-nowrap">
+            <table className="w-full border-collapse text-left text-slate-200">
                 {/* Header Row */}
                 <thead className="top-0 border-b border-white/10 bg-white/10 font-semibold">
                     <tr>
@@ -201,7 +238,7 @@ const Table = () => {
 
 export const BottomMainContent = () => {
     return (
-        <div className="flex w-full min-w-0 flex-col overflow-hidden border-t border-white/10 px-8 pt-3">
+        <div className="flex w-full min-w-0 flex-col overflow-hidden border-t border-white/10 px-8 pt-5 text-xs">
             <Header />
             <div className="w-full overflow-x-auto">
                 <Table />

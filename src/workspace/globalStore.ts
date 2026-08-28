@@ -62,6 +62,14 @@ interface TableState {
     setEncodeCategoricalDropdownState: (
         encodeCategoricalDropdownState: boolean,
     ) => void;
+
+    // Hold processed table
+    processedTableRows: TableRow[];
+    setProcessedTableRows: (processedTableRows: TableRow[]) => void;
+
+    // Hold processed column's table
+    processedColumns: string[];
+    setProcessedColumns: (processedColumns: string[]) => void;
 }
 
 export const useGlobalStore = create<TableState>((set) => ({
@@ -79,6 +87,8 @@ export const useGlobalStore = create<TableState>((set) => ({
     encodeCategoricalState: false,
     encodeCategoricalValue: 'One-Hot Encoding',
     encodeCategoricalDropdownState: false,
+    processedTableRows: [],
+    processedColumns: [],
 
     setColumns: (newColumns) => set({ columns: newColumns }),
     setRows: (newRows) => set({ rows: newRows }),
@@ -104,4 +114,16 @@ export const useGlobalStore = create<TableState>((set) => ({
         set({
             encodeCategoricalDropdownState: newEncodeCategoricalDropdownState,
         }),
+    setProcessedTableRows: (newProcessedTableRows) => set({ processedTableRows: newProcessedTableRows }),
+    setProcessedColumns: (newProcessedColumns) => set({ processedColumns: newProcessedColumns })
 }));
+
+export function useGlobal<
+    K extends keyof TableState,
+    SK extends keyof TableState
+>(valueKey: K, setterKey: SK) {
+    const value = useGlobalStore((state) => state[valueKey]);
+    const setter = useGlobalStore((state) => state[setterKey]);
+
+    return [value, setter] as const;
+}
