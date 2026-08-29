@@ -16,21 +16,25 @@ ipcMain.handle('select-workspace', async () => {
     return result.filePaths[0]; // Returns absolute folder path
 });
 
-let pythonProcess: ChildProcess | null = null;
+let pyProc: ChildProcess | null = null;
 
 // Function to start Python FastAPI backend automatically
 function startPythonBackend() {
-    pythonProcess = spawn('python3', [
-        path.join(__dirname, '../../backend/server.py'),
-    ]);
+    const scriptPath = app.isPackaged
+        ? path.join(process.resourcesPath, 'backend-server', 'backend-server')
+        : path.join(__dirname, '../../backend/server.py'); // Adjust this to your dev script path
 
-    pythonProcess.stdout?.on('data', (data) => {
-        console.log(`Python: ${data}`);
-    });
+    if (app.isPackaged) {
+        // Run the PyInstaller executable in production
+        pyProc = spawn(scriptPath, []);
+    } else {
+        // Run standard Python script in development
+        pyProc = spawn('python3', [scriptPath]);
+    }
 
-    pythonProcess.stderr?.on('data', (data) => {
-        console.error(`Python Error: ${data}`);
-    });
+    if (pyProc != null) {
+        console.log('Backend process spawned successfully');
+    }
 }
 
 // Function to create the main Electron window
@@ -65,7 +69,7 @@ app.on('window-all-closed', () => {
 
 // Kill Python process when Electron app closes
 app.on('will-quit', () => {
-    if (pythonProcess) {
-        pythonProcess.kill();
+    if (pyProc) {
+        pyProc.kill();
     }
 });

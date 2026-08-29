@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
 
-from utils.service import Processing, Utility
+from utils.service import Processing, Utility, MachineLearningProcessing
 
 app = FastAPI()
 
@@ -37,9 +37,20 @@ class TableAfterProcessedRequest(BaseModel):
     limit: int = 5
 
 class HistogramData(BaseModel):
-    path: str
+    data: list[dict[str, list]]
     column: str
     bins: int
+
+class CorrelationMatrixProps(BaseModel):
+    path: str
+    columns: list[str]
+
+class PerformLinearRegressionProps(BaseModel):
+    filePath: str
+    selectedFeatures: list[str]
+    selectedLabels: list[str]
+    isDropna: bool
+    splitRatio: float
 
 @app.post("/api/multiply")
 def multiply_numbers(data: MathInput):
@@ -70,7 +81,15 @@ def get_file_size(data: PathInput):
 
 @app.post("/api/create-histogram")
 def create_histogram(data: HistogramData):
-    return Processing.create_histogram(data.path, data.column, data.bins)
+    return Processing.create_histogram(data.data, data.column, data.bins)
+
+@app.post("/api/get-correlation-matrix")
+def get_correlation_matrix(data: CorrelationMatrixProps):
+    return Processing.get_correlation_matrix(data.path, data.columns)
+
+@app.post("/api/perform-linear-regression")
+def perform_linear_regression(data: PerformLinearRegressionProps):
+    return MachineLearningProcessing.perform_linear_regression(data.filePath, data.selectedFeatures, data.selectedLabels, data.isDropna, data.splitRatio)
 
 if __name__ == "__main__":
     import uvicorn

@@ -6,11 +6,27 @@
     "scripts": {
         "build:renderer": "vite build",
         "build:main": "tsc",
-        "build": "npm run build:renderer && npm run build:main",
+        "build": "npm run build:renderer && npm run build:main && electron-builder",
         "watch:renderer": "vite",
         "watch:main": "tsc -w",
         "start:electron": "cross-env NODE_ENV=development electron .",
         "dev": "concurrently \"npm run watch:renderer\" \"npm run watch:main\" \"npm run start:electron\""
+    },
+    "build": {
+        "appId": "com.aivisualbuilder.app",
+        "files": [
+            "dist/**/*",
+            "package.json"
+        ],
+        "extraResources": [
+            {
+                "from": "dist/backend-server",
+                "to": "backend-server",
+                "filter": [
+                    "**/*"
+                ]
+            }
+        ]
     },
     "keywords": [],
     "author": "",
@@ -34,6 +50,7 @@
         "copyfiles": "^2.4.1",
         "cross-env": "^10.1.0",
         "electron": "^43.4.1",
+        "electron-builder": "^26.15.3",
         "electron-reload": "^2.0.0-alpha.1",
         "postcss": "^8.5.26",
         "prettier-plugin-tailwindcss": "^0.8.1",

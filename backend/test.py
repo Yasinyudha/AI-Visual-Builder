@@ -2,21 +2,19 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-def create_histogram(data: np.array, bins: int):
-    # Calculate equal width intervals
-    counts = pd.cut(data, bins=bins).value_counts(sort=False)
+def get_correlation_matrix(path: str, columns: list[str]) -> dict[str, any]:
+    df = pd.read_csv(path)
+    df = df[columns]
 
-    # Convert to list of dictionaries
-    histogram_data = [
-        {
-            "interval": f"{round(interval.left, 1)} - {round(interval.right, 1)}",
-            "count": int(count)
-        }
-        for interval, count in counts.items()
-    ]
+    numeric_df = df.select_dtypes(include=[np.number])
+    corr_matrix = numeric_df.corr().round(3)
+    
+    # Format for frontend grid or heatmap rendering
+    return {
+        "columns": numeric_df.columns.tolist(),
+        "matrix": corr_matrix.to_dict()
+    }
 
-    return histogram_data
-
-create_histogram(
-    data = np.random.normal(loc=100, scale=15, size=10)
+print(
+    get_correlation_matrix(path='/home/yasin/Work/Personal Project/workspace/example.csv', columns=['study_time_hours', 'attendance_percent'])["matrix"]
 )

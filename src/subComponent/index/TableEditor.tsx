@@ -126,6 +126,12 @@ function ProcessSubmit() {
     const setProcessedColumns = useMainContentStore(
         (state) => state.setProcessedColumns,
     );
+    const setProcessedDataList = useIndexStore(
+        (state) => state.setProcessedDataList,
+    );
+    const setCorrelationMatrixValue = useIndexStore(
+        (state) => state.setCorrelationMatrixValue,
+    );
 
     const handleProcessedTable = async () => {
         if (!selectedFilePath) return;
@@ -150,10 +156,31 @@ function ProcessSubmit() {
                 }),
             },
         );
+
+        const responseMatrix = await fetch(
+            'http://localhost:8000/api/get-correlation-matrix',
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    path: selectedFilePath,
+                    columns: selectedFeatures,
+                }),
+            },
+        );
+
+        // Await data
         const data = await response.json();
+        const dataMatrix = await responseMatrix.json();
 
         setProcessedRows(data.rows);
         setProcessedColumns(data.columns);
+
+        // Push the new processed data
+        setProcessedDataList(data.data);
+
+        // Push the new matrix data
+        setCorrelationMatrixValue(dataMatrix.matrix);
 
         setIsLoading(false);
     };

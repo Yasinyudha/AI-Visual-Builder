@@ -1,20 +1,19 @@
 import { useEffect, useState } from 'react';
 import { search } from '../renderer/global';
+import { useIndex } from '../stores/renderer/indexStore';
 
 interface FeatureSelectedProps {
     state: boolean;
     columns: string[] | null;
-    onSelectFeatures: (features: string[]) => void;
     onClose: () => void;
 }
 
 export const FeatureSelected = ({
     state,
     columns,
-    onSelectFeatures,
     onClose,
 }: FeatureSelectedProps) => {
-    const [selectFeatures, setSelectFeatures] = useState<string[]>([]);
+    const [selectFeatures, setSelectFeatures] = useIndex('selectedFeatures');
 
     useEffect(() => {
         if (!state) return;
@@ -34,7 +33,6 @@ export const FeatureSelected = ({
             : [...selectFeatures, columnName];
 
         setSelectFeatures(updatedFeatures);
-        onSelectFeatures(updatedFeatures);
     };
 
     return (

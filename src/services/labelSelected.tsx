@@ -1,20 +1,19 @@
 import { useEffect, useState } from 'react';
 import { search } from '../renderer/global';
+import { useIndex } from '../stores/renderer/indexStore';
 
 interface LabelSelectedProps {
     state: boolean;
     columns: string[] | null;
-    onSelectLabels: (features: string[]) => void;
     onClose: () => void;
 }
 
 export const LabelSelected = ({
     state,
     columns,
-    onSelectLabels,
     onClose,
 }: LabelSelectedProps) => {
-    const [selectLabels, setSelectLabels] = useState<string[]>([]);
+    const [selectLabels, setSelectLabels] = useIndex('selectedLabels');
 
     useEffect(() => {
         if (!state) return;
@@ -34,7 +33,6 @@ export const LabelSelected = ({
             : [...selectLabels, columnName];
 
         setSelectLabels(updatedLabels);
-        onSelectLabels(updatedLabels);
     };
 
     return (

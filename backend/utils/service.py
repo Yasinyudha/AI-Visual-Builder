@@ -2,7 +2,36 @@ import pandas as pd
 import numpy as np
 import os
 import math
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 from sklearn.preprocessing import MinMaxScaler, RobustScaler, OrdinalEncoder
+
+class MachineLearningProcessing:
+    @staticmethod
+    def perform_linear_regression(filePath: str, selectedFeatures: list[str], selectedLabels: list[str], isDropna: bool, splitRatio: float):
+        df = pd.read_csv(filePath)
+
+        if isDropna:
+            df.dropna(inplace=True)
+
+        X = df[selectedFeatures]
+        y = df[selectedLabels]
+
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, train_size=splitRatio, random_state=42
+        )
+
+        model = LinearRegression()
+        model.fit(X_train, y_train)
+
+        preds = model.predict(X_test)
+
+        return {
+            "r2Score": float(r2_score(y_test, preds)),
+            "mae": float(mean_absolute_error(y_test, preds)),
+            "rmse": float(np.sqrt(mean_squared_error(y_test, preds)))
+        }
 
 class Processing:
     @staticmethod
@@ -111,36 +140,72 @@ class Processing:
                     cleaned_row[key] = val
             cleaned_records.append(cleaned_row)
 
+        # 5. Capture post-processed total rows and active column names
+        total_rows = len(df)
+        final_columns = df.columns.tolist()
+
+        # 6. Format into List of Dicts by Column
+        df_all = df.replace([np.inf, -np.inf], np.nan)
+        
+        data = []
+        for col in final_columns:
+            raw_values = df_all[col].tolist()
+            
+            # Sanitize NaNs and Infs to None (null in JSON)
+            cleaned_values = [
+                None if (isinstance(v, (float, np.floating)) and (math.isnan(v) or math.isinf(v))) or pd.isna(v) else v
+                for v in raw_values
+            ]
+            
+            data.append({col: cleaned_values})
+
         return {
             "columns": final_columns,
             "rows": cleaned_records,
-            "total_rows": total_rows
+            "total_rows": total_rows,
+            "data": data
         }
 
     def create_histogram(
-            path: str,
+            data: list[dict[str, list]],
             column: str,
             bins: int
     ) -> list[dict[str, str]]:
 
-        # Get data based on column and selected path
+        # Find the list of given column
+        for individual_data in data:
+            if (list(individual_data.keys())[0] == column):
+
+                # Get data based on column
+                df_numpy = np.array(individual_data.get(column))
+                
+                # Calculate equal width intervals
+                counts = pd.cut(df_numpy, bins=bins).value_counts()
+    
+                # Convert to list of dictionaries
+                histogram_data = [
+                    {
+                        "interval": f"{round(interval.left, 1)} - {round(interval.right, 1)}",
+                        "count": int(count)
+                    }
+                    for interval, count in counts.items()
+                ]
+
+                return {
+                    "data": histogram_data
+                }
+
+    def get_correlation_matrix(path: str, columns: list[str]) -> dict[str, any]:
         df = pd.read_csv(path)
-        df_numpy = df[column].to_numpy()
+        df = df[columns]
+
+        numeric_df = df.select_dtypes(include=[np.number])
+        corr_matrix = numeric_df.corr().round(3)
         
-        # Calculate equal width intervals
-        counts = pd.cut(df_numpy, bins=bins).value_counts()
-
-        # Convert to list of dictionaries
-        histogram_data = [
-            {
-                "interval": f"{round(interval.left, 1)} - {round(interval.right, 1)}",
-                "count": int(count)
-            }
-            for interval, count in counts.items()
-        ]
-
+        # Format for frontend grid or heatmap rendering
         return {
-            "data": histogram_data
+            "columns": numeric_df.columns.tolist(),
+            "matrix": corr_matrix.to_dict()
         }
 
 class Utility:

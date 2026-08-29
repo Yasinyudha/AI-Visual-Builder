@@ -8,7 +8,14 @@ export const useWorkspace = (onSelectFile: (filePath: string) => void) => {
     const [size, setSize] = useState<number[] | null>(null);
     const [activeFile, setActiveFile] = useState<string | null>(null);
 
-    const setSelectedFilePath = useIndexStore((state) => state.setSelectedFilePath);
+    const setSelectedFeatures = useIndexStore(
+        (state) => state.setSelectedFeatures,
+    );
+    const setSelectedLabels = useIndexStore((state) => state.setSelectedLabels);
+
+    const setSelectedFilePath = useIndexStore(
+        (state) => state.setSelectedFilePath,
+    );
 
     const folderName = workspacePath
         ? workspacePath.split(/[/\\]/).filter(Boolean).pop() || workspacePath
@@ -26,6 +33,10 @@ export const useWorkspace = (onSelectFile: (filePath: string) => void) => {
         setActiveFile(filename);
         onSelectFile(absolutePath);
         setSelectedFilePath(absolutePath);
+
+        // Reset the selected features and labels if user click another file
+        setSelectedFeatures([]);
+        setSelectedLabels([]);
     };
 
     useEffect(() => {
