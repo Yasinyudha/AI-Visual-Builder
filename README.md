@@ -1,36 +1,32 @@
-# Welcome Fellas
+# VisualML Studio
 
-Welcome to the AI Visual Builder app. This open-source tool simplifies the development of Machine Learning, Deep Learning, and general AI applications. The project is currently in version 1.0.0 and actively welcoming improvements.
+Build, train, and evaluate Machine Learning, Deep Learning, and general generative AI models visually with no coding required.
 
-This project is open to everyone, and anyone can use it freely. We invite you to contribute and help us make a meaningful impact!
+Our platform is an open-source platform designed to simplify AI development for everyone. Currently in v1.0.0, the project is completely free to use and actively evolving. We warmly welcome community contributions to help us make a meaningful impact.
 
 # App Overview
 
-The app is divided into four main sections: the sidebar (which includes the Visual Studio Code-style Workspace Editor and Table Editor), the Data Preview (showing raw and processed tables), Statistics, and Training and Evaluation.
+Our platform is a powerful, node-based visual programming environment designed to democratize AI development. Whether you're a data science student, a researcher, or a developer looking to prototype quickly, this app allows you to construct end-to-end data pipelines and train predictive models through an intuitive drag-and-drop node interface.
+
+Our platform simplifies the development of preprocessing scripts and complex configuration workflows through an intuitive visual interface. Users can seamlessly connect multiple data sources, configure and fine-tune model hyperparameters, customize preprocessing pipelines, and monitor execution results in real time—all without the need to manually manage complicated configuration files.
 
 ![alt text](./src/renderer/assets/image-readme/img-1.png)
 
-## The Sidebar Section
+# Key Features
 
-The sidebar contains the Workspace Editor and Table Editor. Like Visual Studio Code, the Workspace Editor allows users to open project directories. Currently, the app only supports CSV files, which are previewed in the raw data viewer where users can select feature and label columns. Multi-feature and multi-label selections are supported, though current modeling is limited to linear regression. In the Table Editor, users can preprocess the feature columns by enabling missing value removal (dropna), choosing a normalization method, and applying non-numeric data encoding (such as one-hot or ordinal encoding).
+1. Node-Based Pipeline Architecture
+2. Upload CSV and tabular datasets directly into the workspace
+3. Real-time Table Preview and Pre-Processed Table inspectors to track data transformations at every step
+4. Effortlessly define Features and Labels
+5. Configure Train-Test Split ratios using interactive sliders
+6. Apply data scaling and normalization techniques (Robust, Standard, Min-Max)
+7. Choose from a variety of built-in machine learning algorithms (Linear Regression, Logistic Regression, etc.)
+8. Fine-tune core hyperparameters like Learning Rate and Iterations on the fly
+9. Dedicated Grapher and Statistics tabs to visualize model performance and training dynamics
+10. Live execution Logs for debugging and tracking pipeline runs
 
-## Table Preview Section
+# Tech Stack
 
-This section previews the raw data selected in the Workspace Editor, as well as the processed data. Features selected by the user are highlighted in red, while selected labels are highlighted in green. Although the previews display only 5 to 20 rows, the total row count for each table is shown.
-
-## Statistics Section
-
-Currently, this section features interactive distributions and a Pearson correlation matrix for chosen features. Users can adjust histogram bin counts from 5 to 30 to help analyze key features and target labels prior to training.
-
-## Train and Evaluation Section
-
-This section enables users to train models and evaluate performance. Users can configure the train-test split ratio, set a random seed, define the Machine Learning task type (classification or regression), maintain class ratios (stratification), select a model, and tune hyperparameters. Once training is complete, the evaluation metrics are displayed: classification tasks show accuracy, precision, recall, and F1-score, while regression tasks display the relevant error metrics.
-
-# Other Important Notes
-
-The app uses an Electron framework with a React frontend and a Python backend. Contributions are welcome. Feel free to fork the project and open a pull request.
-
-## How to Run This Project as Development?
-
-1. Run `npm run dev`
-2. Run `server.py` in backend directory
+- Frontend: React, Tailwind CSS
+- Backend: Django
+- Storage: Supabase
