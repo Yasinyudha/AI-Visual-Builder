@@ -1,0 +1,61 @@
+@import "tailwindcss";
+
+@font-face {
+    font-family: 'Jakarta-Regular';
+    src: url("./assets/fonts/PlusJakartaSans-Regular.ttf");
+}
+
+@font-face {
+    font-family: 'Jakarta-Medium';
+    src: url('./assets/fonts/PlusJakartaSans-Medium.ttf');
+}
+
+@font-face {
+    font-family: 'Jakarta-Semibold';
+    src: url('./assets/fonts/PlusJakartaSans-SemiBold.ttf');
+}
+
+@font-face {
+    font-family: 'Jakarta-Bold';
+    src: url('./assets/fonts/PlusJakartaSans-Bold.ttf');
+}
+
+@theme {
+    --color-main-background: #111111;
+    --color-grey: #424242;
+    --color-unique-yellow: #FFD400;
+    --color-dim-white: #F5F5F5;
+    --color-dim-white-five: #1C1C1C;
+    --color-unique-red: #FF0000;
+    
+    --font-jakarta-regular: 'Jakarta-Regular';
+    --font-jakarta-medium: 'Jakarta-Medium';
+    --font-jakarta-semibold: 'Jakarta-Semibold';
+    --font-jakarta-bold: 'Jakarta-Bold';
+}
+
+@layer utilities {
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #121212;
+    border-radius: 4px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #2a2a2a;
+    border-radius: 4px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #3f3f3f;
+  }
+
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #2a2a2a #121212;
+  }
+}
